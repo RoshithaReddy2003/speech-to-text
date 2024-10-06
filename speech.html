@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Speech to Text</title>
+    <style>
+        body{
+            background-color: pink;
+        }
+        h1{
+            text-align:center;
+        }
+    </style>
+</head>
+<body >
+    <h1>Real-Time Speech to Text</h1>
+    <h2>Select a language:</h2>
+    <select id="languageSelect">
+        <option value="en-US" data-stop-command="stop">English</option>
+        <option value="te-IN" data-stop-command="ఆగు">Telugu</option>
+        <option value="hi-IN" data-stop-command="रुको">Hindi</option>
+    </select>
+    <button onclick="startRecognition()">Start Listening</button>
+    <p id="output"></p>
+
+    <script>
+        function startRecognition() {
+            const selectElement = document.getElementById("languageSelect");
+            const languageCode = selectElement.value;
+            const stopCommand = selectElement.options[selectElement.selectedIndex].getAttribute("data-stop-command");
+            
+            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = languageCode;
+            recognition.continuous = true;
+            recognition.interimResults = false;
+
+            recognition.onstart = function() {
+                document.getElementById("output").innerText = "Listening... Say '" + stopCommand + "' to stop.";
+            };
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[event.resultIndex][0].transcript.trim();
+                document.getElementById("output").innerText = "You said: " + transcript;
+                if (transcript.toLowerCase().includes(stopCommand.toLowerCase())) {
+                    document.getElementById("output").innerText = "Stop command recognized. Stopping...";
+                    recognition.stop();
+                }
+            };
+
+            recognition.onerror = function(event) {
+                document.getElementById("output").innerText = "Error occurred: " + event.error;
+            };
+
+            recognition.onend = function() {
+                document.getElementById("output").innerText += " Recognition ended.";
+            };
+
+            recognition.start();
+        }
+    </script>
+</body>
+</html>
